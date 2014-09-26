@@ -43,6 +43,7 @@ module Network.MessagePackRpc.Client (
 import Control.Exception
 import Control.Monad
 import Control.Monad.Trans.Control
+import Control.Monad.Trans.Resource
 import Control.Monad.State.Strict as CMS
 import qualified Data.ByteString as S
 import Data.Conduit
@@ -73,7 +74,7 @@ data Connection m where
 runClient :: (MonadIO m, MonadBaseControl IO m)
              => S.ByteString -> Int -> ClientT m a -> m ()
 runClient host port m = do
-  runTCPClient (clientSettings port host) $ \ad -> do
+  runGeneralTCPClient (clientSettings port host) $ \ad -> do
     (rsrc, _) <- appSource ad $$+ return ()
     void $ evalStateT (unClientT m) (Connection rsrc (appSink ad) 0)
 

@@ -42,6 +42,7 @@ import Control.Exception as E
 import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.Control
+import Control.Monad.Trans.Resource
 import Data.Conduit
 import Data.Conduit.Network
 import qualified Data.Conduit.Binary as CB
@@ -91,7 +92,7 @@ serve :: forall m . (MonadIO m, MonadThrow m, MonadBaseControl IO m)
          => Int                     -- ^ Port number
          -> [(String, RpcMethod m)] -- ^ list of (method name, RPC method)
          -> m ()
-serve port methods = runTCPServer (serverSettings port "*") $ \ad -> do
+serve port methods = runGeneralTCPServer (serverSettings port "*") $ \ad -> do
   (rsrc, _) <- appSource ad $$+ return ()
   processRequests rsrc (appSink ad)
   where
